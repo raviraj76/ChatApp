@@ -3,6 +3,7 @@ const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
 const cors = require("cors");
+const path = require("path"); // ✅ Added
 
 const app = express();
 const server = http.createServer(app);
@@ -54,7 +55,6 @@ io.on("connection", (socket) => {
 
     console.log(`${username} joined room: ${room}`);
 
-    // Send other users in the room (for video call)
     const otherUsers = Array.from(rooms[room]).filter(id => id !== socket.id);
     socket.emit("usersInRoom", otherUsers);
   });
@@ -93,16 +93,21 @@ io.on("connection", (socket) => {
   socket.on("disconnect", () => {
     console.log("❌ User disconnected:", socket.id);
 
-    // Remove from users list
     delete users[socket.id];
     io.emit("activeUsers", Object.values(users));
 
-    // Remove from rooms
     for (const room in rooms) {
       rooms[room].delete(socket.id);
       if (rooms[room].size === 0) delete rooms[room];
     }
   });
+});
+
+// =======================
+// Serve frontend index.html
+// =======================
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
 // =======================
