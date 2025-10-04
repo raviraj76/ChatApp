@@ -1,9 +1,8 @@
-// server.js
 const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
 const cors = require("cors");
-const path = require("path"); // For serving static files
+const path = require("path");
 
 const app = express();
 const server = http.createServer(app);
@@ -11,7 +10,7 @@ const server = http.createServer(app);
 // =======================
 // Serve frontend files
 // =======================
-const publicPath = path.resolve(__dirname, "public");
+const publicPath = path.join(__dirname, "public");
 app.use(express.static(publicPath));
 
 // =======================
@@ -22,8 +21,8 @@ app.use(cors());
 // =======================
 // Data Stores
 // =======================
-const rooms = {};   // { roomId: Set(socketIds) }
-const users = {};   // { socketId: { username, dp } }
+const rooms = {}; // { roomId: Set(socketIds) }
+const users = {}; // { socketId: { username, dp } }
 
 // =======================
 // Socket.io
@@ -38,7 +37,6 @@ const io = new Server(server, {
 io.on("connection", (socket) => {
   console.log("✅ Socket connected:", socket.id);
 
-  // USER MANAGEMENT
   socket.on("setUsername", (username) => {
     if (!users[socket.id]) users[socket.id] = {};
     users[socket.id].username = username;
@@ -53,7 +51,6 @@ io.on("connection", (socket) => {
     io.emit("chatMessage", { username: data.username, message: "updated DP", dp: data.dp });
   });
 
-  // ROOM JOINING
   socket.on("joinChat", ({ room, username }) => {
     if (!rooms[room]) rooms[room] = new Set();
     rooms[room].add(socket.id);
@@ -61,13 +58,10 @@ io.on("connection", (socket) => {
     socket.join(room);
     socket.data.username = username;
 
-    console.log(`${username} joined room: ${room}`);
-
     const otherUsers = Array.from(rooms[room]).filter(id => id !== socket.id);
     socket.emit("usersInRoom", otherUsers);
   });
 
-  // CHAT
   socket.on("sendMessage", ({ room, sender, text }) => {
     io.to(room).emit("receiveMessage", { sender, text });
   });
@@ -80,7 +74,6 @@ io.on("connection", (socket) => {
     socket.broadcast.emit("typing", user);
   });
 
-  // VIDEO CALL / SIGNALING
   socket.on("callUser", ({ to, signalData, from, name }) => {
     io.to(to).emit("incomingCall", { signal: signalData, from, name });
   });
@@ -97,10 +90,8 @@ io.on("connection", (socket) => {
     socket.broadcast.emit("videoSignal", data);
   });
 
-  // DISCONNECT
   socket.on("disconnect", () => {
     console.log("❌ User disconnected:", socket.id);
-
     delete users[socket.id];
     io.emit("activeUsers", Object.values(users));
 
@@ -112,9 +103,9 @@ io.on("connection", (socket) => {
 });
 
 // =======================
-// Root Route — Serve Frontend
+// Serve index.html for all unknown routes
 // =======================
-app.get("/", (req, res) => {
+app.get("*", (req, res) => {
   res.sendFile(path.join(publicPath, "index.html"));
 });
 
@@ -122,4 +113,4 @@ app.get("/", (req, res) => {
 // Start Server
 // =======================
 const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => console.log(`🚀 Server running on http://localhost:${PORT}`));
+server.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
