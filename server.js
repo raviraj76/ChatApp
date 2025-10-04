@@ -3,12 +3,19 @@ const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
 const cors = require("cors");
-const path = require("path"); // ✅ Added
+const path = require("path"); // Added to serve static files
 
 const app = express();
 const server = http.createServer(app);
 
-app.use(express.static("public"));
+// =======================
+// Serve frontend files
+// =======================
+app.use(express.static(path.join(__dirname, "public"))); // Serve everything in public/
+
+// =======================
+// CORS Middleware
+// =======================
 app.use(cors());
 
 // =======================
@@ -30,7 +37,7 @@ const io = new Server(server, {
 io.on("connection", (socket) => {
   console.log("✅ Socket connected:", socket.id);
 
-  // ========== USER MANAGEMENT ==========
+  // USER MANAGEMENT
   socket.on("setUsername", (username) => {
     if (!users[socket.id]) users[socket.id] = {};
     users[socket.id].username = username;
@@ -45,7 +52,7 @@ io.on("connection", (socket) => {
     io.emit("chatMessage", { username: data.username, message: "updated DP", dp: data.dp });
   });
 
-  // ========== ROOM JOINING ==========
+  // ROOM JOINING
   socket.on("joinChat", ({ room, username }) => {
     if (!rooms[room]) rooms[room] = new Set();
     rooms[room].add(socket.id);
@@ -59,7 +66,7 @@ io.on("connection", (socket) => {
     socket.emit("usersInRoom", otherUsers);
   });
 
-  // ========== CHAT ==========
+  // CHAT
   socket.on("sendMessage", ({ room, sender, text }) => {
     io.to(room).emit("receiveMessage", { sender, text });
   });
@@ -72,7 +79,7 @@ io.on("connection", (socket) => {
     socket.broadcast.emit("typing", user);
   });
 
-  // ========== VIDEO CALL / SIGNALING ==========
+  // VIDEO CALL / SIGNALING
   socket.on("callUser", ({ to, signalData, from, name }) => {
     io.to(to).emit("incomingCall", { signal: signalData, from, name });
   });
@@ -89,7 +96,7 @@ io.on("connection", (socket) => {
     socket.broadcast.emit("videoSignal", data);
   });
 
-  // ========== DISCONNECT ==========
+  // DISCONNECT
   socket.on("disconnect", () => {
     console.log("❌ User disconnected:", socket.id);
 
@@ -104,7 +111,7 @@ io.on("connection", (socket) => {
 });
 
 // =======================
-// Serve frontend index.html
+// Root Route — Serve Frontend
 // =======================
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
