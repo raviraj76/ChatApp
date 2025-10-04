@@ -3,7 +3,7 @@ const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
 const cors = require("cors");
-const path = require("path"); // Added to serve static files
+const path = require("path"); // For serving static files
 
 const app = express();
 const server = http.createServer(app);
@@ -11,7 +11,8 @@ const server = http.createServer(app);
 // =======================
 // Serve frontend files
 // =======================
-app.use(express.static(path.join(__dirname, "public"))); // Serve everything in public/
+const publicPath = path.resolve(__dirname, "public");
+app.use(express.static(publicPath));
 
 // =======================
 // CORS Middleware
@@ -114,7 +115,7 @@ io.on("connection", (socket) => {
 // Root Route — Serve Frontend
 // =======================
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "index.html"));
+  res.sendFile(path.join(publicPath, "index.html"));
 });
 
 // =======================
