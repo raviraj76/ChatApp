@@ -1,59 +1,124 @@
-const express = require("express");
-const http = require("http");
-const { Server } = require("socket.io");
-const path = require("path");
+import express from "express";
+import http from "http";
+import { Server } from "socket.io";
+import cors from "cors";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server);
 
-const PORT = process.env.PORT || 5000;
+// =======================
+// CORS Middleware
+// =======================
+app.use(cors({
+  origin: "*", // Change this to your frontend URL in production
+  methods: ["GET", "POST"]
+}));
 
-// Serve static frontend files
-app.use(express.static(path.join(__dirname, "public")));
+// =======================
+// Serve frontend files
+// =======================
+const publicPath = path.join(__dirname, "public");
+app.use(express.static(publicPath));
 
-let users = {};
+// =======================
+// Data Stores
+// =======================
+const rooms = {};
+const users = {};
+
+// =======================
+// Socket.io
+// =======================
+const io = new Server(server, {
+  path: "/socket.io",
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"]
+  }
+});
 
 io.on("connection", (socket) => {
-  console.log("New connection:", socket.id);
+  console.log("✅ Socket connected:", socket.id);
 
-  // Set username
   socket.on("setUsername", (username) => {
-    users[socket.id] = username;
+    if (!users[socket.id]) users[socket.id] = {};
+    users[socket.id].username = username;
     io.emit("activeUsers", Object.values(users));
   });
 
-  // Chat message
-  socket.on("chatMessage", (data) => {
-    socket.broadcast.emit("chatMessage", data);
-  });
-
-  // Typing indicator
-  socket.on("typing", (username) => {
-    socket.broadcast.emit("typing", username);
-  });
-
-  // Update DP
   socket.on("updateDp", (data) => {
-    socket.broadcast.emit("updateDp", data);
+    if (!users[socket.id]) users[socket.id] = {};
+    users[socket.id].dp = data.dp;
+    users[socket.id].username = data.username || users[socket.id].username || "User";
+    io.emit("activeUsers", Object.values(users));
+    io.emit("chatMessage", { username: data.username, message: "updated DP", dp: data.dp });
   });
 
-  // Video/Audio call signaling
+  socket.on("joinChat", ({ room, username }) => {
+    if (!rooms[room]) rooms[room] = new Set();
+    rooms[room].add(socket.id);
+
+    socket.join(room);
+    socket.data.username = username;
+
+    const otherUsers = Array.from(rooms[room]).filter(id => id !== socket.id);
+    socket.emit("usersInRoom", otherUsers);
+  });
+
+  socket.on("sendMessage", ({ room, sender, text }) => {
+    io.to(room).emit("receiveMessage", { sender, text });
+  });
+
+  socket.on("chatMessage", (data) => {
+    io.emit("chatMessage", data);
+  });
+
+  socket.on("typing", (user) => {
+    socket.broadcast.emit("typing", user);
+  });
+
+  socket.on("callUser", ({ to, signalData, from, name }) => {
+    io.to(to).emit("incomingCall", { signal: signalData, from, name });
+  });
+
+  socket.on("answerCall", ({ to, signal }) => {
+    io.to(to).emit("callAccepted", signal);
+  });
+
+  socket.on("iceCandidate", ({ to, candidate }) => {
+    io.to(to).emit("iceCandidate", { candidate });
+  });
+
   socket.on("videoSignal", (data) => {
     socket.broadcast.emit("videoSignal", data);
   });
 
-  // Disconnect
   socket.on("disconnect", () => {
+    console.log("❌ User disconnected:", socket.id);
     delete users[socket.id];
     io.emit("activeUsers", Object.values(users));
-    console.log("Disconnected:", socket.id);
+
+    for (const room in rooms) {
+      rooms[room].delete(socket.id);
+      if (rooms[room].size === 0) delete rooms[room];
+    }
   });
 });
 
-// ✅ Catch-all route for SPA (this fixes the Render crash)
-app.get("*", (req, res) => {
+// =======================
+// ✅ FIXED Catch-all Route for Render
+// =======================
+app.get(/.*/, (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
-server.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
+// =======================
+// Start Server
+// =======================
+const PORT = process.env.PORT || 5000;
+server.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
