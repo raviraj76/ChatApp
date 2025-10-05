@@ -11,7 +11,7 @@ const server = http.createServer(app);
 // CORS Middleware
 // =======================
 app.use(cors({
-    origin: "*", // Replace "*" with your frontend URL in production
+    origin: "*", // Change to your frontend URL in production
     methods: ["GET", "POST"]
 }));
 
@@ -109,7 +109,7 @@ io.on("connection", (socket) => {
 // =======================
 // Catch-all route for frontend
 // =======================
-app.get("*", (req, res) => {
+app.get("/*", (req, res) => {
     res.sendFile(path.join(publicPath, "index.html"));
 });
 
