@@ -1,0 +1,184 @@
+/* 🌈 Base layout */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #7b2ff7, #f107a3);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+/* 💬 Chat container */
+.chat-container {
+    width: 100%;
+    max-width: 420px;
+    height: 95vh;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0px 0px 30px rgba(0, 0, 0, 0.5);
+    overflow: hidden;
+}
+
+/* 🟠 DP & username section */
+.dp-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.dp-section img {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    border: 4px solid orange;
+    object-fit: cover;
+    box-shadow: 0px 0px 20px orange;
+}
+
+.username-input {
+    margin-top: 10px;
+    padding: 8px;
+    border-radius: 20px;
+    border: none;
+    outline: none;
+    width: 80%;
+    text-align: center;
+}
+
+/* 📞 Call buttons */
+.call-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin: 15px 0;
+}
+
+.call-buttons button {
+  padding: 8px 16px;
+  border: 2px solid #ccc;
+  border-radius: 50px;
+  background: white;
+  color: black;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  font-size: 14px;
+}
+
+.call-buttons button:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  border-color: #888;
+}
+
+/* 💬 Chat section */
+.chat-section {
+    flex: 1;
+    background: rgba(0, 0, 0, 0.15);
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    overflow-y: auto;
+}
+
+/* 🧹 FIXED: Hide broken image icon */
+.message img {
+    display: none !important;
+}
+
+/* 🟣 Chat message bubbles */
+.message {
+    padding: 10px 15px;
+    border-radius: 20px;
+    max-width: 75%;
+    word-wrap: break-word;
+    margin: 5px 0;
+    box-shadow: 0 0 15px rgba(255, 165, 0, 0.5);
+    backdrop-filter: blur(8px);
+}
+
+/* 🫶 Sent messages */
+.message.self {
+    align-self: flex-end;
+    background: linear-gradient(135deg, #ff9a9e, #fad0c4);
+    border: 2px solid gold;
+}
+
+/* 💙 Received messages */
+.message.other {
+    align-self: flex-start;
+    background: linear-gradient(135deg, #a1c4fd, #c2e9fb);
+    border: 2px solid orange;
+}
+
+/* 🖊️ Input area */
+.input-area {
+    display: flex;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.input-area input {
+    flex: 1;
+    padding: 12px;
+    border-radius: 30px;
+    border: none;
+    outline: none;
+    font-size: 16px;
+}
+
+.input-area button {
+    padding: 12px 20px;
+    margin-left: 10px;
+    border: none;
+    background: orange;
+    color: white;
+    border-radius: 30px;
+    cursor: pointer;
+    box-shadow: 0px 0px 10px orange;
+    font-weight: bold;
+}
+
+.input-area button:hover {
+    background: darkorange;
+}
+
+/* ✍️ Typing indicator */
+.typing-indicator {
+    padding: 5px;
+    font-style: italic;
+    color: white;
+}
+
+/* 🎥 Video area */
+.video-call-area {
+    display: flex;
+    justify-content: center;
+    padding: 10px;
+}
+
+/* 📱 Responsive */
+@media (max-width: 480px) {
+    .chat-container {
+        width: 100%;
+        height: 100vh;
+        border-radius: 0;
+    }
+
+    .dp-section img {
+        width: 80px;
+        height: 80px;
+    }
+
+    .message {
+        max-width: 85%;
+    }
+}

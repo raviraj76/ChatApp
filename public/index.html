@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Realtime Chat</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="chat-container">
+
+    <!-- HEADER: DP + Username + Call Buttons -->
+    <div class="dp-section">
+      <img id="dpImg" src="assets/default.png" alt="">
+      <input type="file" id="dpInput" style="display:none;">
+      <button id="uploadDpBtn">Change DP</button>
+
+      <input type="text" id="username" placeholder="Enter your name" class="username-input">
+
+      <div class="call-buttons">
+        <button id="startVideo">📹 Video Call</button>
+        <button id="startAudio">🎤 Audio Call</button>
+        <button id="disconnectCall">❌ End Call</button>
+      </div>
+     </div>
+   
+
+    <!-- MESSAGE CONTAINER -->
+    <div class="chat-section" id="messages"></div>
+
+    <!-- INPUT FIELD -->
+    <div class="input-area">
+      <input type="text" id="message" placeholder="Type a message...">
+      <button id="send">Send</button>
+    </div>
+
+    <!-- TYPING INDICATOR -->
+    <div id="typing" class="typing-indicator"></div>
+
+    <!-- VIDEO CALL AREA -->
+    <div id="videos" class="video-call-area"></div>
+
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="https://unpkg.com/simple-peer@9.11.1/simplepeer.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
