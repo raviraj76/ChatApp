@@ -18,7 +18,7 @@ app.use(cors({
 // =======================
 // Serve frontend files
 // =======================
-const publicPath = path.join(__dirname, "client", "build");
+const publicPath = path.join(__dirname, "public");
 app.use(express.static(publicPath));
 
 // =======================
