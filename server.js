@@ -10,12 +10,15 @@ const server = http.createServer(app);
 // =======================
 // CORS Middleware
 // =======================
-app.use(cors());
+app.use(cors({
+    origin: "*", // Replace "*" with your frontend URL in production
+    methods: ["GET", "POST"]
+}));
 
 // =======================
 // Serve frontend files
 // =======================
-const publicPath = path.join(__dirname, "public");
+const publicPath = path.join(__dirname, "client", "build");
 app.use(express.static(publicPath));
 
 // =======================
@@ -28,6 +31,7 @@ const users = {};
 // Socket.io
 // =======================
 const io = new Server(server, {
+    path: "/socket.io",
     cors: {
         origin: "*",
         methods: ["GET", "POST"]
@@ -105,7 +109,7 @@ io.on("connection", (socket) => {
 // =======================
 // Catch-all route for frontend
 // =======================
-app.get(/.*/, (req, res) => {
+app.get("*", (req, res) => {
     res.sendFile(path.join(publicPath, "index.html"));
 });
 
