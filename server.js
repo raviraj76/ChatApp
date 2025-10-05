@@ -11,13 +11,14 @@ const server = http.createServer(app);
 // CORS Middleware
 // =======================
 app.use(cors({
-    origin: "*", // Replace "*" with frontend URL in production
+    origin: "*", // Change "*" to your frontend URL in production
     methods: ["GET", "POST"]
 }));
 
 // =======================
 // Serve frontend files
 // =======================
+// Make sure this path matches your folder structure
 const publicPath = path.join(__dirname, "public");
 app.use(express.static(publicPath));
 
@@ -109,8 +110,13 @@ io.on("connection", (socket) => {
 // =======================
 // Catch-all route for frontend
 // =======================
-app.use((req, res, next) => {
-    res.sendFile(path.join(publicPath, "index.html"));
+app.get("*", (req, res) => {
+    res.sendFile(path.join(publicPath, "index.html"), err => {
+        if (err) {
+            console.error(err);
+            res.status(500).send(err);
+        }
+    });
 });
 
 // =======================
