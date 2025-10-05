@@ -11,7 +11,7 @@ const server = http.createServer(app);
 // CORS Middleware
 // =======================
 app.use(cors({
-    origin: "*", // Replace "*" with frontend URL in production
+    origin: "*", // Change "*" to your frontend URL in production
     methods: ["GET", "POST"]
 }));
 
@@ -107,12 +107,12 @@ io.on("connection", (socket) => {
 });
 
 // =======================
-// Catch-all route for frontend (Fixed for Render)
+// Correct catch-all route
 // =======================
-app.get("/:path(*)", (req, res) => {
-    res.sendFile(path.join(publicPath, "index.html"), (err) => {
+app.get("/*", (req, res) => {
+    res.sendFile(path.resolve(__dirname, "public", "index.html"), err => {
         if (err) {
-            console.error("Error serving index.html:", err);
+            console.error("Error sending index.html:", err);
             res.status(500).send(err);
         }
     });
